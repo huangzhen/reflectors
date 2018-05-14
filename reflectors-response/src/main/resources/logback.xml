@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<configuration debug="true" scan="true" scanPeriod="60 seconds">
+    <appender name="service-and-http"
+              class="ch.qos.logback.core.rolling.RollingFileAppender">
+
+        <filter class="ch.qos.logback.classic.filter.LevelFilter">
+            <level>DEBUG</level>
+            <onMatch>ACCEPT</onMatch>
+            <onMismatch>ACCEPT</onMismatch>
+        </filter>
+
+        <file>./log/reflectors/reflectors.log</file>
+
+        <!--<file>${gnome.log.dir}/${gnome.log.file}</file>-->
+
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <FileNamePattern>
+                ./log/reflectors/store/reflectors.%d{yyyy-MM-dd-HH}.log
+                <!--${gnome.log.dir}/${gnome.log.file}.%d{yyyy-MM-dd-HH}-->
+
+            </FileNamePattern>
+            <MaxHistory>4</MaxHistory>
+        </rollingPolicy>
+
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [ %thread ] [ %p ] %m%n</pattern>
+        </encoder>
+    </appender>
+
+    <appender name="console-printer"
+              class="ch.qos.logback.core.ConsoleAppender">
+        <filter class="ch.qos.logback.classic.filter.LevelFilter">
+            <level>DEBUG</level>
+            <onMatch>ACCEPT</onMatch>
+            <onMismatch>ACCEPT</onMismatch>
+        </filter>
+
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [ %thread ] [ %p ] %m%n</pattern>
+        </encoder>
+    </appender>
+
+    <root level="debug">
+        <appender-ref ref="service-and-http"/>
+        <appender-ref ref="console-printer"/>
+    </root>
+
+</configuration>
