@@ -14,8 +14,8 @@ import org.slf4j.LoggerFactory;
  *
  * @author huangzhen
  */
-public class SparrowSystem {
-    private static final Logger logger = LoggerFactory.getLogger(SparrowSystem.class);
+public class ReflectorsSystem {
+    private static final Logger logger = LoggerFactory.getLogger(ReflectorsSystem.class);
     private static final String configFile = Thread.currentThread().getContextClassLoader().getResource("reflectors.conf").getPath();
 
     private static final int mapCacheSize = UtilOper.getIntValue(configFile, "map_cache_size", 100);

@@ -1,6 +1,6 @@
 package com.sywc.reflectors.monitor.notify;
 
-import com.sywc.reflectors.SparrowSystem;
+import com.sywc.reflectors.ReflectorsSystem;
 import net.contentobjects.jnotify.JNotifyListener;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -64,23 +64,23 @@ public class DirectoryNotifyListener implements JNotifyListener {
     private void removeCache(int fileType, String fileName) {
         switch (fileType) {
             case 1: {
-                if (SparrowSystem.upplatStaticMap.containsKey(fileName)) {
+                if (ReflectorsSystem.upplatStaticMap.containsKey(fileName)) {
                     logger.debug("The static  file {} in cache,remove it!");
-                    SparrowSystem.upplatStaticMap.remove(fileName);
+                    ReflectorsSystem.upplatStaticMap.remove(fileName);
                 }
                 break;
             }
             case 2: {
-                if (SparrowSystem.upplatConfMap.containsKey(fileName)) {
+                if (ReflectorsSystem.upplatConfMap.containsKey(fileName)) {
                     logger.debug("The conf  file {} in cache,remove it!");
-                    SparrowSystem.upplatConfMap.remove(fileName);
+                    ReflectorsSystem.upplatConfMap.remove(fileName);
                 }
                 break;
             }
             case 3: {
-                if (SparrowSystem.upplatResMap.containsKey(fileName)) {
+                if (ReflectorsSystem.upplatResMap.containsKey(fileName)) {
                     logger.debug("The response  file {} in cache,remove it!");
-                    SparrowSystem.upplatResMap.remove(fileName);
+                    ReflectorsSystem.upplatResMap.remove(fileName);
                 }
                 break;
             }

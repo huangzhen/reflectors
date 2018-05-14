@@ -1,6 +1,6 @@
 package com.sywc.reflectors.monitor.notify;
 
-import com.sywc.reflectors.SparrowSystem;
+import com.sywc.reflectors.ReflectorsSystem;
 import com.sywc.reflectors.share.SparrowConstants;
 import com.sywc.reflectors.share.UtilOper;
 import net.contentobjects.jnotify.JNotify;
@@ -31,10 +31,10 @@ public class PlatFileMonitorNotifly {
             @Override
             public void run() {
                 StringBuilder fileBuilder = new StringBuilder();
-                fileBuilder.append(SparrowSystem.upplatDirPath).append(File.separator).append(SparrowConstants.UPPLAT_CONF_DIR_NAME);
+                fileBuilder.append(ReflectorsSystem.upplatDirPath).append(File.separator).append(SparrowConstants.UPPLAT_CONF_DIR_NAME);
                 String confFilePath = fileBuilder.toString();
                 fileBuilder.setLength(0);
-                fileBuilder.append(SparrowSystem.upplatDirPath).append(File.separator).append(SparrowConstants.UPPLAT_RES_DIR_NAME);
+                fileBuilder.append(ReflectorsSystem.upplatDirPath).append(File.separator).append(SparrowConstants.UPPLAT_RES_DIR_NAME);
                 String resFilePath = fileBuilder.toString();
                 /**只监听 修改删除和重命名*/
                 int mask = JNotify.FILE_DELETED | JNotify.FILE_MODIFIED | JNotify.FILE_RENAMED;
@@ -44,7 +44,7 @@ public class PlatFileMonitorNotifly {
                 int confId = 0;
                 int resId = 0;
                 try {
-                    staticId = JNotify.addWatch(SparrowSystem.staticDirPath, mask, watchSubtree, new DirectoryNotifyListener(1));
+                    staticId = JNotify.addWatch(ReflectorsSystem.staticDirPath, mask, watchSubtree, new DirectoryNotifyListener(1));
                     confId = JNotify.addWatch(confFilePath, mask, watchSubtree, new DirectoryNotifyListener(2));
                     resId = JNotify.addWatch(resFilePath, mask, watchSubtree, new DirectoryNotifyListener(3));
                 } catch (JNotifyException e) {

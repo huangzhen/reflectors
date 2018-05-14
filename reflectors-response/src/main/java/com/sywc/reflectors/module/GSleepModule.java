@@ -1,6 +1,6 @@
 package com.sywc.reflectors.module;
 
-import com.sywc.reflectors.SparrowSystem;
+import com.sywc.reflectors.ReflectorsSystem;
 import com.sywc.reflectors.share.DelayMsg;
 import com.sywc.reflectors.share.GSessionInfo;
 import com.iflytek.sparrow.share.GThreadFactory;
@@ -83,7 +83,7 @@ public class GSleepModule {
     private static void reqSleepThead(final GSessionInfo sessInfo) {
         final long sleepTime = realSleepTime(sessInfo);
         if (sleepTime <= 0L) {
-            SparrowSystem.srvModule().addMsg(SparrowConstants.MSG_ID_SERVICE_ADX_AD_RSP, sessInfo);
+            ReflectorsSystem.srvModule().addMsg(SparrowConstants.MSG_ID_SERVICE_ADX_AD_RSP, sessInfo);
             return;
         }
         GDelayModule.addMsg(new DelayMsg(sessInfo, sleepTime));
@@ -99,7 +99,7 @@ public class GSleepModule {
      */
     private static long realSleepTime(GSessionInfo sessionInfo) {
         long costTime = System.currentTimeMillis() - sessionInfo.millRecvReq;
-        int expectedTime = SparrowSystem.sysMgrModule().getSysConfigDTO().getSysDealTime();
+        int expectedTime = ReflectorsSystem.sysMgrModule().getSysConfigDTO().getSysDealTime();
         long realTime = sessionInfo.getPlatConfigDTO().getDelayTime() - costTime - expectedTime;
 
         logger.debug("req has cost time {} ms,expected deal time {} ms,real sleep time {} ms,sid={}",

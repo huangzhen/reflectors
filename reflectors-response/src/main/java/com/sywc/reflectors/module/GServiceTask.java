@@ -1,7 +1,7 @@
 package com.sywc.reflectors.module;
 
 import com.alibaba.fastjson.JSONObject;
-import com.sywc.reflectors.SparrowSystem;
+import com.sywc.reflectors.ReflectorsSystem;
 import com.iflytek.sparrow.share.Constants;
 import com.sywc.reflectors.share.ExceptionConstants;
 import com.sywc.reflectors.share.GSessionInfo;
@@ -78,12 +78,12 @@ public class GServiceTask extends GTaskBase {
                 String platName = urlParamMap.get(SparrowConstants.MUST_PARAM_NAME_NAME);
                 sessInfo.platName = platName;
                 /**先从缓存去，取不到在加载配置文件*/
-                PlatConfigDTO platConfigDTO = SparrowSystem.upplatConfMap.get(platName);
+                PlatConfigDTO platConfigDTO = ReflectorsSystem.upplatConfMap.get(platName);
 
                 if (null == platConfigDTO) {
                     logger.debug("UpPlat conf file[{}] has cached,read from cache!,sid={}",platName, sessInfo.sid);
                     StringBuilder fileBuffer = new StringBuilder();
-                    fileBuffer.append(SparrowSystem.upplatDirPath).append(File.separator);
+                    fileBuffer.append(ReflectorsSystem.upplatDirPath).append(File.separator);
                     fileBuffer.append(SparrowConstants.UPPLAT_CONF_DIR_NAME).append(File.separator).append(platName);
 
                     FileInputStream inputStream = null;
@@ -94,7 +94,7 @@ public class GServiceTask extends GTaskBase {
                             exceptionDTO = new ExceptionDTO(sessInfo.sid, ExceptionConstants.platConfIsEmpty(fileBuffer.toString(), platName));
                         }
                         platConfigDTO = JSONObject.parseObject(fileValue, PlatConfigDTO.class);
-                        SparrowSystem.upplatConfMap.put(platName, platConfigDTO);
+                        ReflectorsSystem.upplatConfMap.put(platName, platConfigDTO);
                     } catch (FileNotFoundException e) {
                         logger.error("Not found file[{}], errorMsg={}, sid={}",platName ,e.getMessage(), sessInfo.sid);
                         exceptionDTO = new ExceptionDTO(sessInfo.sid, ExceptionConstants.platConfNotExists(fileBuffer.toString(), platName));
@@ -131,21 +131,21 @@ public class GServiceTask extends GTaskBase {
 
                 if (issuredFlag) {
                     StringBuilder fileBuffer = new StringBuilder();
-                    fileBuffer.append(SparrowSystem.upplatDirPath).append(File.separator);
+                    fileBuffer.append(ReflectorsSystem.upplatDirPath).append(File.separator);
                     fileBuffer.append(SparrowConstants.UPPLAT_RES_DIR_NAME).append(File.separator).append(sessInfo.platName);
 
                     FileInputStream inputStream = null;
                     String fileResValue = StringUtils.EMPTY;
-                    if (SparrowSystem.upplatResMap.containsKey(sessInfo.platName)) {
+                    if (ReflectorsSystem.upplatResMap.containsKey(sessInfo.platName)) {
                         logger.debug("Upplat res file[{}] has cached,read from cache!,sid={}",sessInfo.platName, sessInfo.sid);
                         /** 缓存里存在，直接从缓存里读取 */
-                        sessInfo.callback.run(HttpEncode(200, headers, SparrowSystem.upplatResMap.get(sessInfo.platName)));
+                        sessInfo.callback.run(HttpEncode(200, headers, ReflectorsSystem.upplatResMap.get(sessInfo.platName)));
                     } else {
                         try {
                             logger.debug("UpPlat res file not in cache,read from disk!,sid={}", sessInfo.sid);
                             inputStream = new FileInputStream(fileBuffer.toString());
                             fileResValue = IOUtils.toString(inputStream, Charsets.UTF_8);
-                            SparrowSystem.upplatResMap.put(sessInfo.platName, fileResValue);
+                            ReflectorsSystem.upplatResMap.put(sessInfo.platName, fileResValue);
                         } catch (FileNotFoundException e) {
                             logger.error("Not found file[{}], errorMsg={}, sid={}",sessInfo.platName, e.getMessage(), sessInfo.sid);
                         } catch (IOException e) {
@@ -184,20 +184,20 @@ public class GServiceTask extends GTaskBase {
                     return;
                 }
                 String platName = urlParamMap.get(SparrowConstants.MUST_PARAM_NAME_NAME);
-                if (SparrowSystem.upplatStaticMap.containsKey(platName)) {
+                if (ReflectorsSystem.upplatStaticMap.containsKey(platName)) {
                     logger.debug("Static file[{}] has cached,read from cache!,sid={}",platName, sessInfo.sid);
                     /** 缓存里存在，直接从缓存里读取 */
-                    sessInfo.callback.run(HttpEncode(200, headers, SparrowSystem.upplatStaticMap.get(platName)));
+                    sessInfo.callback.run(HttpEncode(200, headers, ReflectorsSystem.upplatStaticMap.get(platName)));
                 } else {
                     logger.debug("Static file[{}] not in cache,read from disk!,sid={}",platName, sessInfo.sid);
-                    String filePath = SparrowSystem.staticDirPath + File.separator + platName;
+                    String filePath = ReflectorsSystem.staticDirPath + File.separator + platName;
                     FileInputStream inputStream = null;
                     try {
                         inputStream = new FileInputStream(filePath);
                         String fileValue = IOUtils.toString(inputStream, Charsets.UTF_8);
                         sessInfo.callback.run(HttpEncode(200, headers, fileValue));
                         logger.debug("Put static file[{}] to cache!,sid={}", platName,sessInfo.sid);
-                        SparrowSystem.upplatStaticMap.put(platName, fileValue);
+                        ReflectorsSystem.upplatStaticMap.put(platName, fileValue);
                     } catch (FileNotFoundException e) {
                         logger.error("Not found file[{}],sid={}",platName, sessInfo.sid);
                         exceptionDTO = new ExceptionDTO(sessInfo.sid, ExceptionConstants.upplatNotExists(filePath, platName));
@@ -205,7 +205,7 @@ public class GServiceTask extends GTaskBase {
                         e.printStackTrace();
                     } catch (Exception e) {
                         logger.error("File read[{}] error,errorMsg={},sid={}", platName,e.getMessage(), sessInfo.sid);
-                        exceptionDTO = new ExceptionDTO(sessInfo.sid, ExceptionConstants.upplatNotExists(SparrowSystem.staticDirPath, platName));
+                        exceptionDTO = new ExceptionDTO(sessInfo.sid, ExceptionConstants.upplatNotExists(ReflectorsSystem.staticDirPath, platName));
                     } finally {
                         if (null != exceptionDTO) {
                             sessInfo.callback.run(HttpEncode(200, headers, exceptionDTO.toString()));

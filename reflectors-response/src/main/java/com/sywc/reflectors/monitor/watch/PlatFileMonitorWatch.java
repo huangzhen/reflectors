@@ -1,6 +1,6 @@
 package com.sywc.reflectors.monitor.watch;
 
-import com.sywc.reflectors.SparrowSystem;
+import com.sywc.reflectors.ReflectorsSystem;
 import com.sywc.reflectors.share.SparrowConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,13 +44,13 @@ public class PlatFileMonitorWatch {
             watchRes = FileSystems.getDefault().newWatchService();
             watchStatic = FileSystems.getDefault().newWatchService();
 
-            Paths.get(SparrowSystem.upplatDirPath, SparrowConstants.UPPLAT_CONF_DIR_NAME).register(watchConf,
+            Paths.get(ReflectorsSystem.upplatDirPath, SparrowConstants.UPPLAT_CONF_DIR_NAME).register(watchConf,
                     StandardWatchEventKinds.ENTRY_MODIFY, StandardWatchEventKinds.ENTRY_DELETE);
 
-            Paths.get(SparrowSystem.upplatDirPath, SparrowConstants.UPPLAT_RES_DIR_NAME).register(watchRes,
+            Paths.get(ReflectorsSystem.upplatDirPath, SparrowConstants.UPPLAT_RES_DIR_NAME).register(watchRes,
                     StandardWatchEventKinds.ENTRY_MODIFY, StandardWatchEventKinds.ENTRY_DELETE);
 
-            Paths.get(SparrowSystem.staticDirPath).register(watchStatic,
+            Paths.get(ReflectorsSystem.staticDirPath).register(watchStatic,
                     StandardWatchEventKinds.ENTRY_MODIFY, StandardWatchEventKinds.ENTRY_DELETE);
 
         } catch (IOException e) {
@@ -82,8 +82,8 @@ public class PlatFileMonitorWatch {
                                     continue;
                                 }
                                 logger.debug("check the conf file {} has changed!", fileName);
-                                if (SparrowSystem.upplatConfMap.containsKey(fileName)) {
-                                    SparrowSystem.upplatConfMap.remove(fileName);
+                                if (ReflectorsSystem.upplatConfMap.containsKey(fileName)) {
+                                    ReflectorsSystem.upplatConfMap.remove(fileName);
                                 }
                             }
                         }
@@ -94,8 +94,8 @@ public class PlatFileMonitorWatch {
                                     continue;
                                 }
                                 logger.debug("check the response file {} has changed!", fileName);
-                                if (SparrowSystem.upplatResMap.containsKey(fileName)) {
-                                    SparrowSystem.upplatResMap.remove(fileName);
+                                if (ReflectorsSystem.upplatResMap.containsKey(fileName)) {
+                                    ReflectorsSystem.upplatResMap.remove(fileName);
                                 }
                             }
                         }
@@ -106,8 +106,8 @@ public class PlatFileMonitorWatch {
                                     continue;
                                 }
                                 logger.debug("check the static file {} has changed!", fileName);
-                                if (SparrowSystem.upplatStaticMap.containsKey(fileName)) {
-                                    SparrowSystem.upplatStaticMap.remove(fileName);
+                                if (ReflectorsSystem.upplatStaticMap.containsKey(fileName)) {
+                                    ReflectorsSystem.upplatStaticMap.remove(fileName);
                                 }
                             }
                         }

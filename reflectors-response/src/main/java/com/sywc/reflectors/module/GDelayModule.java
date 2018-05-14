@@ -1,6 +1,6 @@
 package com.sywc.reflectors.module;
 
-import com.sywc.reflectors.SparrowSystem;
+import com.sywc.reflectors.ReflectorsSystem;
 import com.sywc.reflectors.share.DelayMsg;
 import com.sywc.reflectors.share.GSessionInfo;
 import com.iflytek.sparrow.share.GThreadFactory;
@@ -102,7 +102,7 @@ class GDelayedTaskConsumer implements Runnable {
                     continue;
                 }
                 if (delayMsg.getObjContext() instanceof GSessionInfo) {
-                    SparrowSystem.srvModule().addMsg(SparrowConstants.MSG_ID_SERVICE_ADX_AD_RSP, delayMsg.getObjContext());
+                    ReflectorsSystem.srvModule().addMsg(SparrowConstants.MSG_ID_SERVICE_ADX_AD_RSP, delayMsg.getObjContext());
                 } else {
                     logger.warn("msg.objContext is not instanceof GSessionInfo");
                     continue;
