@@ -1,8 +1,8 @@
 package com.sywc.reflectors.share;
 
-import com.iflytek.sparrow.share.Constants;
+import com.sywc.reflectors.share.Constants;
 
-public final class SparrowConstants {
+public final class ReflectorsConstants {
 
     public final static int SERVICE_STATUS_INIT = 1;
     public final static int SERVICE_STATUS_WORK = 2;

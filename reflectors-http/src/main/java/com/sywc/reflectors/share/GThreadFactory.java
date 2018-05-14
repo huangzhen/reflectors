@@ -1,4 +1,4 @@
-package com.iflytek.sparrow.share;
+package com.sywc.reflectors.share;
 
 import com.codahale.metrics.Meter;
 import org.slf4j.Logger;

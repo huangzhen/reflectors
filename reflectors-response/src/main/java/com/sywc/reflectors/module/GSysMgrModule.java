@@ -1,15 +1,15 @@
 package com.sywc.reflectors.module;
 
 import com.sywc.reflectors.handler.GServiceServerHandler;
-import com.iflytek.sparrow.http.GServer;
+import com.sywc.reflectors.http.GServer;
 import com.sywc.reflectors.monitor.notify.PlatFileMonitorNotifly;
-import com.iflytek.sparrow.share.Constants;
-import com.sywc.reflectors.share.SparrowConstants;
+import com.sywc.reflectors.monitor.watch.PlatFileMonitorWatch;
+import com.sywc.reflectors.share.Constants;
+import com.sywc.reflectors.share.ReflectorsConstants;
 import com.sywc.reflectors.share.UtilOper;
 import com.sywc.reflectors.share.dto.SysConfigDTO;
 import com.sywc.reflectors.share.task.GMsg;
 import com.sywc.reflectors.share.task.GTaskBase;
-import com.sywc.reflectors.monitor.watch.PlatFileMonitorWatch;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,7 +34,7 @@ public class GSysMgrModule extends GTaskBase {
     public GSysMgrModule(String configFile) {
         super("sys-mgr-task", 0);
         /** 系统处于初始化状态 */
-        sysState = SparrowConstants.SERVICE_STATUS_INIT;
+        sysState = ReflectorsConstants.SERVICE_STATUS_INIT;
         sysConfigDTO = new SysConfigDTO(configFile);
         /** 初始化步骤从0开始, 往后面逐步初始化 */
         sysInitStep = 0;
@@ -63,7 +63,6 @@ public class GSysMgrModule extends GTaskBase {
         PlatFileMonitorNotifly.startMonitor();
         log.debug("File monitor has start !");
 
-        GSleepModule.start();
         GDelayModule.start();
 
         /** 第二步：初始化业务模块 */
@@ -97,7 +96,7 @@ public class GSysMgrModule extends GTaskBase {
 
         /** 至此, 系统全部初始化完成 */
         log.error("System init OK,Cost {} ms", System.currentTimeMillis() - start);
-        sysState = SparrowConstants.SERVICE_STATUS_WORK;
+        sysState = ReflectorsConstants.SERVICE_STATUS_WORK;
 
         return true;
     }
@@ -108,30 +107,30 @@ public class GSysMgrModule extends GTaskBase {
     }
 
     public void sysEnterToInitState() {
-        addMsg(SparrowConstants.SERVICE_STATUS_INIT, null);
+        addMsg(ReflectorsConstants.SERVICE_STATUS_INIT, null);
     }
 
     public void sysEnterToWorkState() {
-        addMsg(SparrowConstants.SERVICE_STATUS_WORK, null);
+        addMsg(ReflectorsConstants.SERVICE_STATUS_WORK, null);
     }
 
     public void sysEnterToQuitState() {
-        addMsg(SparrowConstants.SERVICE_STATUS_QUIT, null);
+        addMsg(ReflectorsConstants.SERVICE_STATUS_QUIT, null);
     }
 
     @Override
     protected void handlerMsg(int msgId, Object objContext) {
         switch (msgId) {
-            case SparrowConstants.SERVICE_STATUS_INIT: {
-                sysState = SparrowConstants.SERVICE_STATUS_INIT;
+            case ReflectorsConstants.SERVICE_STATUS_INIT: {
+                sysState = ReflectorsConstants.SERVICE_STATUS_INIT;
                 sysInitStep = 0;
 
                 /** 系统进入初始化状态时, 便定时启动系统各个模块、配置, 直到全部启动成功, 才进入工作状态 */
                 while (running) {
-                    if (SparrowConstants.SERVICE_STATUS_WORK == sysState) {
+                    if (ReflectorsConstants.SERVICE_STATUS_WORK == sysState) {
                         sysEnterToWorkState();
                         break;
-                    } else if (SparrowConstants.SERVICE_STATUS_QUIT == sysState) {
+                    } else if (ReflectorsConstants.SERVICE_STATUS_QUIT == sysState) {
                         sysEnterToQuitState();
                         break;
                     }
@@ -140,12 +139,12 @@ public class GSysMgrModule extends GTaskBase {
                 break;
             }
 
-            case SparrowConstants.SERVICE_STATUS_WORK: {
+            case ReflectorsConstants.SERVICE_STATUS_WORK: {
                 while (running) {
-                    if (SparrowConstants.SERVICE_STATUS_INIT == sysState) {
+                    if (ReflectorsConstants.SERVICE_STATUS_INIT == sysState) {
                         sysEnterToInitState();
                         break;
-                    } else if (SparrowConstants.SERVICE_STATUS_QUIT == sysState) {
+                    } else if (ReflectorsConstants.SERVICE_STATUS_QUIT == sysState) {
                         sysEnterToQuitState();
                         break;
                     }
@@ -154,7 +153,7 @@ public class GSysMgrModule extends GTaskBase {
                 break;
             }
 
-            case SparrowConstants.SERVICE_STATUS_QUIT: {
+            case ReflectorsConstants.SERVICE_STATUS_QUIT: {
                 try {
 
                     /**
@@ -178,7 +177,6 @@ public class GSysMgrModule extends GTaskBase {
                     }
 
                     PlatFileMonitorWatch.shutdown();
-                    GSleepModule.shutdown();
                     GDelayModule.shutdown();
 
                     try {
@@ -188,7 +186,7 @@ public class GSysMgrModule extends GTaskBase {
                         log.error("stopping sysMgrModule: ", e);
                     }
                 } finally {
-                    sysState = SparrowConstants.SERVICE_STATUS_QUIT;
+                    sysState = ReflectorsConstants.SERVICE_STATUS_QUIT;
                 }
                 sysInitStep = 0;
                 break;
@@ -228,11 +226,11 @@ public class GSysMgrModule extends GTaskBase {
         }
         running = false;
         Thread thread = getThreadByName(taskName);
-        if (sysState != SparrowConstants.SERVICE_STATUS_WORK && thread != null) {
+        if (sysState != ReflectorsConstants.SERVICE_STATUS_WORK && thread != null) {
             thread.interrupt();
         }
 
-        addMsg(SparrowConstants.SERVICE_STATUS_QUIT, null);
+        addMsg(ReflectorsConstants.SERVICE_STATUS_QUIT, null);
     }
 
     private Thread getThreadByName(String name) {

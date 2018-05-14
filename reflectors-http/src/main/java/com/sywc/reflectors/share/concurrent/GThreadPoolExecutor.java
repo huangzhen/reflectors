@@ -1,7 +1,7 @@
-package com.iflytek.sparrow.share.concurrent;
+package com.sywc.reflectors.share.concurrent;
 
 import com.codahale.metrics.Meter;
-import com.iflytek.sparrow.share.GThreadFactory;
+import com.sywc.reflectors.share.GThreadFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -1,0 +1,206 @@
+#!/usr/bin/env bash
+#
+# The gnome command script.
+#
+# Environment Variables:
+#
+#   JAVA_HOME        The java implementation to use.  Overrides JAVA_HOME.
+#
+#   GNOME_CLASSPATH  Extra Java CLASSPATH entries.
+#
+#   GNOME_CLASSPATH_PREFIX Extra Java CLASSPATH entries that should be
+#                    prefixed to the system classpath.
+#
+#   GNOME_HEAPSIZE   The maximum amount of heap to use.
+#                    Default is unset and uses the JVMs default setting
+#                    (usually 1/4th of the available memory).
+#
+#   GNOME_LIBRARY_PATH  Gnome additions to JAVA_LIBRARY_PATH for adding
+#                    native libraries.
+#
+#   GNOME_OPTS       Extra Java runtime options.
+#
+#   GNOME_CONF_DIR   Alternate conf dir. Default is ${GNOME_HOME}/conf.
+#
+#   GNOME_ROOT_LOGGER The root appender. Default is INFO,console
+#
+bin=$(dirname "$0")
+bin=$(cd "$bin">/dev/null; pwd)
+
+# This will set GNOME_HOME, etc.
+. "$bin"/gnome-config.sh
+
+# if no args specified, show usage
+if [ $# = 0 ]; then
+  echo "Usage: gnome [<options>] <command> [<args>]"
+  echo "Options:"
+  echo "  --config DIR    Configuration direction to use. Default: ./conf"
+  echo ""
+  echo "Commands:"
+  echo "Some commands take arguments. Pass no args or -h for usage."
+  echo "  sparrow-server      Run the sparrow Server"
+  echo "  clean           Run the Gnome clean up script"
+  echo "  classpath       Dump gnome CLASSPATH"
+  echo "  version         Print the version"
+  echo "  CLASSNAME       Run the class named CLASSNAME"
+  exit 1
+fi
+
+# get arguments
+COMMAND=$1
+shift
+
+JAVA=$JAVA_HOME/bin/java
+
+# override default settings for this command, if applicable
+if [ -f "$GNOME_HOME/conf/gnome-env-$COMMAND.sh" ]; then
+  . "$GNOME_HOME/conf/gnome-env-$COMMAND.sh"
+fi
+
+add_size_suffix() {
+    # add an 'm' suffix if the argument is missing one, otherwise use whats there
+    local val="$1"
+    local lastchar=${val: -1}
+    if [[ "mMgG" == *$lastchar* ]]; then
+        echo $val
+    else
+        echo ${val}m
+    fi
+}
+
+if [[ -n "$GNOME_HEAPSIZE" ]]; then
+    JAVA_HEAP_MAX="-Xmx$(add_size_suffix $GNOME_HEAPSIZE)"
+fi
+
+if [[ -n "$GNOME_OFFHEAPSIZE" ]]; then
+    JAVA_OFFHEAP_MAX="-XX:MaxDirectMemorySize=$(add_size_suffix $GNOME_OFFHEAPSIZE)"
+fi
+
+# so that filenames w/ spaces are handled correctly in loops below
+ORIG_IFS=$IFS
+IFS=
+
+# CLASSPATH initially contains $GNOME_CONF_DIR
+CLASSPATH="${GNOME_CONF_DIR}"
+CLASSPATH=${CLASSPATH}:$JAVA_HOME/lib/tools.jar
+
+add_to_cp_if_exists() {
+  if [ -d "$@" ]; then
+    CLASSPATH=${CLASSPATH}:"$@"
+  fi
+}
+
+# For releases, add reflectors & webapps to CLASSPATH
+# Webapps must come first else it messes up Jetty
+if [ -d "$GNOME_HOME/gnome-webapps" ]; then
+  add_to_cp_if_exists "${GNOME_HOME}"
+fi
+
+#add the reflectors jars for each module
+for f in $GNOME_HOME/reflectors*.jar; do
+    if [[ $f = *sources.jar ]]; then
+        : # Skip sources.jar
+    elif [ -f $f ]; then
+        CLASSPATH=${CLASSPATH}:$f;
+    fi
+done
+
+# Add libs to CLASSPATH
+for f in $GNOME_HOME/lib/*.jar; do
+  CLASSPATH=${CLASSPATH}:$f;
+done
+
+# default log directory & file
+if [ "$GNOME_LOG_DIR" = "" ]; then
+  GNOME_LOG_DIR="$GNOME_HOME/logs"
+fi
+if [ "$GNOME_LOGFILE" = "" ]; then
+  GNOME_LOGFILE='sparrow.log'
+fi
+
+function append_path() {
+  if [ -z "$1" ]; then
+    echo $2
+  else
+    echo $1:$2
+  fi
+}
+
+JAVA_PLATFORM=""
+
+# if GNOME_LIBRARY_PATH is defined lets use it as first or second option
+if [ "$GNOME_LIBRARY_PATH" != "" ]; then
+  JAVA_LIBRARY_PATH=$(append_path "$JAVA_LIBRARY_PATH" "$GNOME_LIBRARY_PATH")
+fi
+
+# Add user-specified CLASSPATH last
+if [ "$GNOME_CLASSPATH" != "" ]; then
+  CLASSPATH=${CLASSPATH}:${GNOME_CLASSPATH}
+fi
+
+# Add user-specified CLASSPATH prefix first
+if [ "$GNOME_CLASSPATH_PREFIX" != "" ]; then
+  CLASSPATH=${GNOME_CLASSPATH_PREFIX}:${CLASSPATH}
+fi
+ 
+# restore ordinary behaviour
+unset IFS
+
+#Set the right GC options based on the what we are running
+declare -a server_cmds=("sparrow-server")
+for cmd in ${server_cmds[@]}; do
+	if [[ $cmd == $COMMAND ]]; then
+		server=true
+		break
+	fi
+done
+
+if [[ $server ]]; then
+	GNOME_OPTS="$GNOME_OPTS $SERVER_GC_OPTS"
+else
+	GNOME_OPTS="$GNOME_OPTS $CLIENT_GC_OPTS"
+fi
+
+# figure out which class to run
+if [ "$COMMAND" = "sparrow-server" ] ; then
+  CLASS="com.iflytek.sparrow.SparrowSystem"
+  if [ "$1" != "stop" ] ; then
+    GNOME_OPTS="$GNOME_OPTS $GNOME_ADX_SERVER_OPTS"
+  fi
+elif [ "$COMMAND" = "clean" ] ; then
+  # TODO
+  echo "clean"
+elif [ "$COMMAND" = "classpath" ] ; then
+  echo $CLASSPATH
+  exit 0
+elif [ "$COMMAND" = "version" ] ; then
+  # CLASS='com.iflytek.gnome.util.VersionInfo'
+  echo "version"
+else
+  CLASS=$COMMAND
+fi
+
+# Have JVM dump heap if we run out of memory.  Files will be 'launch directory'
+# and are named like the following: java_pid21612.hprof. Apparently it doesn't
+# 'cost' to have this flag enabled. Its a 1.6 flag only. See:
+# http://blogs.sun.com/alanb/entry/outofmemoryerror_looks_a_bit_better
+GNOME_OPTS="$GNOME_OPTS -Dgnome.log.dir=$GNOME_LOG_DIR"
+GNOME_OPTS="$GNOME_OPTS -Dgnome.log.file=$GNOME_LOGFILE"
+GNOME_OPTS="$GNOME_OPTS -Dgnome.home.dir=$GNOME_HOME"
+GNOME_OPTS="$GNOME_OPTS -Dgnome.id.str=$GNOME_IDENT_STRING"
+GNOME_OPTS="$GNOME_OPTS -Dgnome.root.logger=${GNOME_ROOT_LOGGER:-INFO,console}"
+
+if [ "x$JAVA_LIBRARY_PATH" != "x" ]; then
+  GNOME_OPTS="$GNOME_OPTS -Djava.library.path=$JAVA_LIBRARY_PATH"
+  export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$JAVA_LIBRARY_PATH"
+fi
+
+HEAP_SETTINGS="$JAVA_HEAP_MAX $JAVA_OFFHEAP_MAX"
+# Exec unless GNOME_NOEXEC is set.
+export CLASSPATH
+if [ "${GNOME_NOEXEC}" != "" ]; then
+  "$JAVA" -Dproc_$COMMAND -XX:OnOutOfMemoryError="kill -9 %p" $HEAP_SETTINGS $GNOME_OPTS $CLASS "$@"
+else
+  echo "exe2"
+  exec "$JAVA"  -Dproc_$COMMAND -XX:OnOutOfMemoryError="kill -9 %p" $HEAP_SETTINGS $GNOME_OPTS $CLASS "$@"
+fi

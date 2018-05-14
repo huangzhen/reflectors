@@ -1,4 +1,4 @@
-package com.iflytek.sparrow.share;
+package com.sywc.reflectors.share;
 
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Maps;
@@ -29,6 +29,7 @@ public class OriginRequest {
         return headers == null || headers.isEmpty();
     }
 
+    @Override
     public String toString() {
         JsonObject jsonObject = new JsonObject();
         jsonObject.addProperty("type", type);

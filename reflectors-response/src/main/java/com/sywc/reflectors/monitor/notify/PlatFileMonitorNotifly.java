@@ -1,7 +1,7 @@
 package com.sywc.reflectors.monitor.notify;
 
 import com.sywc.reflectors.ReflectorsSystem;
-import com.sywc.reflectors.share.SparrowConstants;
+import com.sywc.reflectors.share.ReflectorsConstants;
 import com.sywc.reflectors.share.UtilOper;
 import net.contentobjects.jnotify.JNotify;
 import net.contentobjects.jnotify.JNotifyException;
@@ -31,10 +31,10 @@ public class PlatFileMonitorNotifly {
             @Override
             public void run() {
                 StringBuilder fileBuilder = new StringBuilder();
-                fileBuilder.append(ReflectorsSystem.upplatDirPath).append(File.separator).append(SparrowConstants.UPPLAT_CONF_DIR_NAME);
+                fileBuilder.append(ReflectorsSystem.upplatDirPath).append(File.separator).append(ReflectorsConstants.UPPLAT_CONF_DIR_NAME);
                 String confFilePath = fileBuilder.toString();
                 fileBuilder.setLength(0);
-                fileBuilder.append(ReflectorsSystem.upplatDirPath).append(File.separator).append(SparrowConstants.UPPLAT_RES_DIR_NAME);
+                fileBuilder.append(ReflectorsSystem.upplatDirPath).append(File.separator).append(ReflectorsConstants.UPPLAT_RES_DIR_NAME);
                 String resFilePath = fileBuilder.toString();
                 /**只监听 修改删除和重命名*/
                 int mask = JNotify.FILE_DELETED | JNotify.FILE_MODIFIED | JNotify.FILE_RENAMED;

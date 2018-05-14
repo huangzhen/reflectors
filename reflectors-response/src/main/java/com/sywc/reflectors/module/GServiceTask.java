@@ -2,10 +2,10 @@ package com.sywc.reflectors.module;
 
 import com.alibaba.fastjson.JSONObject;
 import com.sywc.reflectors.ReflectorsSystem;
-import com.iflytek.sparrow.share.Constants;
+import com.sywc.reflectors.share.Constants;
 import com.sywc.reflectors.share.ExceptionConstants;
 import com.sywc.reflectors.share.GSessionInfo;
-import com.sywc.reflectors.share.SparrowConstants;
+import com.sywc.reflectors.share.ReflectorsConstants;
 import com.sywc.reflectors.share.dto.ExceptionDTO;
 import com.sywc.reflectors.share.dto.PlatConfigDTO;
 import com.sywc.reflectors.share.task.GMsg;
@@ -53,7 +53,7 @@ public class GServiceTask extends GTaskBase {
             return;
         }
         switch (msgId) {
-            case SparrowConstants.MSG_ID_SERVICE_ADX_AD_REQ: {
+            case ReflectorsConstants.MSG_ID_SERVICE_ADX_AD_REQ: {
                 GSessionInfo sessInfo = (GSessionInfo) objContext;
                 if (null == sessInfo) {
                     return;
@@ -69,22 +69,22 @@ public class GServiceTask extends GTaskBase {
                     sessInfo.callback.run(HttpEncode(200, headers, exceptionDTO.toString()));
                     break;
                 }
-                if (!urlParamMap.containsKey(SparrowConstants.MUST_PARAM_NAME_NAME) ||
-                        StringUtils.isEmpty(urlParamMap.get(SparrowConstants.MUST_PARAM_NAME_NAME))) {
+                if (!urlParamMap.containsKey(ReflectorsConstants.MUST_PARAM_NAME_NAME) ||
+                        StringUtils.isEmpty(urlParamMap.get(ReflectorsConstants.MUST_PARAM_NAME_NAME))) {
                     exceptionDTO = new ExceptionDTO(sessInfo.sid, ExceptionConstants.paramNameIsEmpty());
                     sessInfo.callback.run(HttpEncode(200, headers, exceptionDTO.toString()));
                     break;
                 }
-                String platName = urlParamMap.get(SparrowConstants.MUST_PARAM_NAME_NAME);
+                String platName = urlParamMap.get(ReflectorsConstants.MUST_PARAM_NAME_NAME);
                 sessInfo.platName = platName;
                 /**先从缓存去，取不到在加载配置文件*/
                 PlatConfigDTO platConfigDTO = ReflectorsSystem.upplatConfMap.get(platName);
 
                 if (null == platConfigDTO) {
-                    logger.debug("UpPlat conf file[{}] has cached,read from cache!,sid={}",platName, sessInfo.sid);
+                    logger.debug("UpPlat conf file[{}] has cached,read from cache!,sid={}", platName, sessInfo.sid);
                     StringBuilder fileBuffer = new StringBuilder();
                     fileBuffer.append(ReflectorsSystem.upplatDirPath).append(File.separator);
-                    fileBuffer.append(SparrowConstants.UPPLAT_CONF_DIR_NAME).append(File.separator).append(platName);
+                    fileBuffer.append(ReflectorsConstants.UPPLAT_CONF_DIR_NAME).append(File.separator).append(platName);
 
                     FileInputStream inputStream = null;
                     try {
@@ -96,13 +96,13 @@ public class GServiceTask extends GTaskBase {
                         platConfigDTO = JSONObject.parseObject(fileValue, PlatConfigDTO.class);
                         ReflectorsSystem.upplatConfMap.put(platName, platConfigDTO);
                     } catch (FileNotFoundException e) {
-                        logger.error("Not found file[{}], errorMsg={}, sid={}",platName ,e.getMessage(), sessInfo.sid);
+                        logger.error("Not found file[{}], errorMsg={}, sid={}", platName, e.getMessage(), sessInfo.sid);
                         exceptionDTO = new ExceptionDTO(sessInfo.sid, ExceptionConstants.platConfNotExists(fileBuffer.toString(), platName));
                     } catch (IOException e) {
-                        logger.error("File read[{}] error,errorMsg={},sid={}", platName,e.getMessage(), sessInfo.sid);
+                        logger.error("File read[{}] error,errorMsg={},sid={}", platName, e.getMessage(), sessInfo.sid);
                         exceptionDTO = new ExceptionDTO(sessInfo.sid, ExceptionConstants.upplatNotExists(fileBuffer.toString(), platName));
                     } catch (Exception e) {
-                        logger.error("File read[{}] error,errorMsg={},sid={}",platName, e.getMessage(), sessInfo.sid);
+                        logger.error("File read[{}] error,errorMsg={},sid={}", platName, e.getMessage(), sessInfo.sid);
                         exceptionDTO = new ExceptionDTO(sessInfo.sid, ExceptionConstants.upplatNotExists(fileBuffer.toString(), platName));
                     } finally {
                         IOUtils.closeQuietly(inputStream);
@@ -112,11 +112,11 @@ public class GServiceTask extends GTaskBase {
                     }
                 }
                 sessInfo.setPlatConfigDTO(platConfigDTO);
-                GSleepModule.addMsg(new GMsg(-1, sessInfo));
+                GDelayModule.addMsg(new GMsg(-1, sessInfo));
                 sessInfo.nanoOverHandlerReq = System.nanoTime();
                 break;
             }
-            case SparrowConstants.MSG_ID_SERVICE_ADX_AD_RSP: {
+            case ReflectorsConstants.MSG_ID_SERVICE_ADX_AD_RSP: {
                 GSessionInfo sessInfo = (GSessionInfo) objContext;
                 if (null == sessInfo) {
                     return;
@@ -132,12 +132,12 @@ public class GServiceTask extends GTaskBase {
                 if (issuredFlag) {
                     StringBuilder fileBuffer = new StringBuilder();
                     fileBuffer.append(ReflectorsSystem.upplatDirPath).append(File.separator);
-                    fileBuffer.append(SparrowConstants.UPPLAT_RES_DIR_NAME).append(File.separator).append(sessInfo.platName);
+                    fileBuffer.append(ReflectorsConstants.UPPLAT_RES_DIR_NAME).append(File.separator).append(sessInfo.platName);
 
                     FileInputStream inputStream = null;
                     String fileResValue = StringUtils.EMPTY;
                     if (ReflectorsSystem.upplatResMap.containsKey(sessInfo.platName)) {
-                        logger.debug("Upplat res file[{}] has cached,read from cache!,sid={}",sessInfo.platName, sessInfo.sid);
+                        logger.debug("Upplat res file[{}] has cached,read from cache!,sid={}", sessInfo.platName, sessInfo.sid);
                         /** 缓存里存在，直接从缓存里读取 */
                         sessInfo.callback.run(HttpEncode(200, headers, ReflectorsSystem.upplatResMap.get(sessInfo.platName)));
                     } else {
@@ -147,9 +147,9 @@ public class GServiceTask extends GTaskBase {
                             fileResValue = IOUtils.toString(inputStream, Charsets.UTF_8);
                             ReflectorsSystem.upplatResMap.put(sessInfo.platName, fileResValue);
                         } catch (FileNotFoundException e) {
-                            logger.error("Not found file[{}], errorMsg={}, sid={}",sessInfo.platName, e.getMessage(), sessInfo.sid);
+                            logger.error("Not found file[{}], errorMsg={}, sid={}", sessInfo.platName, e.getMessage(), sessInfo.sid);
                         } catch (IOException e) {
-                            logger.error("File read[{}] error,errorMsg={},sid={}",sessInfo.platName, e.getMessage(), sessInfo.sid);
+                            logger.error("File read[{}] error,errorMsg={},sid={}", sessInfo.platName, e.getMessage(), sessInfo.sid);
                         } finally {
                             IOUtils.closeQuietly(inputStream);
                         }
@@ -161,7 +161,7 @@ public class GServiceTask extends GTaskBase {
                 logger.debug("response to client, httpReqId = {}, sid = {}", sessInfo.callback.getHttpReqId(), sessInfo.sid);
                 break;
             }
-            case SparrowConstants.MSG_ID_SERVICE_ADX_AD_STATIC: {
+            case ReflectorsConstants.MSG_ID_SERVICE_ADX_AD_STATIC: {
 
                 GSessionInfo sessInfo = (GSessionInfo) objContext;
                 if (null == sessInfo) {
@@ -177,34 +177,34 @@ public class GServiceTask extends GTaskBase {
                     sessInfo.callback.run(HttpEncode(200, headers, exceptionDTO.toString()));
                     return;
                 }
-                if (!urlParamMap.containsKey(SparrowConstants.MUST_PARAM_NAME_NAME) ||
-                        StringUtils.isEmpty(urlParamMap.get(SparrowConstants.MUST_PARAM_NAME_NAME))) {
+                if (!urlParamMap.containsKey(ReflectorsConstants.MUST_PARAM_NAME_NAME) ||
+                        StringUtils.isEmpty(urlParamMap.get(ReflectorsConstants.MUST_PARAM_NAME_NAME))) {
                     exceptionDTO = new ExceptionDTO(sessInfo.sid, ExceptionConstants.paramNameIsEmpty());
                     sessInfo.callback.run(HttpEncode(200, headers, exceptionDTO.toString()));
                     return;
                 }
-                String platName = urlParamMap.get(SparrowConstants.MUST_PARAM_NAME_NAME);
+                String platName = urlParamMap.get(ReflectorsConstants.MUST_PARAM_NAME_NAME);
                 if (ReflectorsSystem.upplatStaticMap.containsKey(platName)) {
-                    logger.debug("Static file[{}] has cached,read from cache!,sid={}",platName, sessInfo.sid);
+                    logger.debug("Static file[{}] has cached,read from cache!,sid={}", platName, sessInfo.sid);
                     /** 缓存里存在，直接从缓存里读取 */
                     sessInfo.callback.run(HttpEncode(200, headers, ReflectorsSystem.upplatStaticMap.get(platName)));
                 } else {
-                    logger.debug("Static file[{}] not in cache,read from disk!,sid={}",platName, sessInfo.sid);
+                    logger.debug("Static file[{}] not in cache,read from disk!,sid={}", platName, sessInfo.sid);
                     String filePath = ReflectorsSystem.staticDirPath + File.separator + platName;
                     FileInputStream inputStream = null;
                     try {
                         inputStream = new FileInputStream(filePath);
                         String fileValue = IOUtils.toString(inputStream, Charsets.UTF_8);
                         sessInfo.callback.run(HttpEncode(200, headers, fileValue));
-                        logger.debug("Put static file[{}] to cache!,sid={}", platName,sessInfo.sid);
+                        logger.debug("Put static file[{}] to cache!,sid={}", platName, sessInfo.sid);
                         ReflectorsSystem.upplatStaticMap.put(platName, fileValue);
                     } catch (FileNotFoundException e) {
-                        logger.error("Not found file[{}],sid={}",platName, sessInfo.sid);
+                        logger.error("Not found file[{}],sid={}", platName, sessInfo.sid);
                         exceptionDTO = new ExceptionDTO(sessInfo.sid, ExceptionConstants.upplatNotExists(filePath, platName));
                     } catch (IOException e) {
                         e.printStackTrace();
                     } catch (Exception e) {
-                        logger.error("File read[{}] error,errorMsg={},sid={}", platName,e.getMessage(), sessInfo.sid);
+                        logger.error("File read[{}] error,errorMsg={},sid={}", platName, e.getMessage(), sessInfo.sid);
                         exceptionDTO = new ExceptionDTO(sessInfo.sid, ExceptionConstants.upplatNotExists(ReflectorsSystem.staticDirPath, platName));
                     } finally {
                         if (null != exceptionDTO) {
@@ -215,7 +215,7 @@ public class GServiceTask extends GTaskBase {
                 }
                 break;
             }
-            case SparrowConstants.MSG_ID_SERVICE_ADX_404: {
+            case ReflectorsConstants.MSG_ID_SERVICE_ADX_404: {
                 if (!(objContext instanceof GSessionInfo)) {
                     logger.error("!(objContext instanceof GSessionInfo)");
                     break;
@@ -224,7 +224,7 @@ public class GServiceTask extends GTaskBase {
                 send404Resp(sessionInfo);
                 break;
             }
-            case SparrowConstants.MSG_ID_SERVICE_ADX_UNSUPPORT_AD_REQUEST_METHOD: {
+            case ReflectorsConstants.MSG_ID_SERVICE_ADX_UNSUPPORT_AD_REQUEST_METHOD: {
                 if (!(objContext instanceof GSessionInfo)) {
                     logger.error("!(objContext instanceof GSessionInfo)");
                     break;
@@ -233,7 +233,7 @@ public class GServiceTask extends GTaskBase {
                 sendResp(sessionInfo, 405);
                 break;
             }
-            case SparrowConstants.MSG_ID_SERVICE_ADX_PREFLIGHT_FOR_AD_REQUEST: {
+            case ReflectorsConstants.MSG_ID_SERVICE_ADX_PREFLIGHT_FOR_AD_REQUEST: {
                 if (!(objContext instanceof GSessionInfo)) {
                     logger.error("!(objContext instanceof GSessionInfo)");
                     break;

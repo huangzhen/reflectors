@@ -1,9 +1,9 @@
-package com.iflytek.sparrow.http;
+package com.sywc.reflectors.http;
 
-import com.iflytek.sparrow.share.Constants;
-import com.iflytek.sparrow.share.GThreadFactory;
-import com.iflytek.sparrow.share.OriginRequest;
-import com.iflytek.sparrow.share.concurrent.GThreadPoolExecutor;
+import com.sywc.reflectors.share.Constants;
+import com.sywc.reflectors.share.GThreadFactory;
+import com.sywc.reflectors.share.OriginRequest;
+import com.sywc.reflectors.share.concurrent.GThreadPoolExecutor;
 import org.httpkit.HttpMethod;
 import org.httpkit.client.HttpClient;
 import org.httpkit.client.IFilter;

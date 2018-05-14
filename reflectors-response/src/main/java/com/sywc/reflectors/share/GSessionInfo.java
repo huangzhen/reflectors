@@ -1,6 +1,6 @@
 package com.sywc.reflectors.share;
 
-import com.iflytek.sparrow.share.OriginRequest;
+import com.sywc.reflectors.share.OriginRequest;
 import com.sywc.reflectors.share.dto.PlatConfigDTO;
 import org.httpkit.server.RespCallback;
 

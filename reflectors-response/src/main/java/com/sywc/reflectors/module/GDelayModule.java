@@ -3,9 +3,10 @@ package com.sywc.reflectors.module;
 import com.sywc.reflectors.ReflectorsSystem;
 import com.sywc.reflectors.share.DelayMsg;
 import com.sywc.reflectors.share.GSessionInfo;
-import com.iflytek.sparrow.share.GThreadFactory;
-import com.sywc.reflectors.share.SparrowConstants;
+import com.sywc.reflectors.share.GThreadFactory;
+import com.sywc.reflectors.share.ReflectorsConstants;
 import com.sywc.reflectors.share.UtilOper;
+import com.sywc.reflectors.share.task.GMsg;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,8 +31,20 @@ public class GDelayModule {
     private static final ExecutorService dispatcher = Executors.newFixedThreadPool(DISPATCHER_SIZE,
             new GThreadFactory("GDelayModule-Dispatcher"));
 
-    public static boolean addMsg(DelayMsg delayMsg) {
-        if (delayMsg != null && delayMsg.getObjContext() != null) {
+    public static boolean addMsg(GMsg msg) {
+        if (msg != null && msg.objContext != null) {
+            GSessionInfo sessInfo;
+            if (!(msg.objContext instanceof GSessionInfo)) {
+                return false;
+            }
+            sessInfo = (GSessionInfo) msg.objContext;
+
+            final long delayTime = realDelayTime(sessInfo);
+            if (delayTime <= 0L) {
+                ReflectorsSystem.srvModule().addMsg(ReflectorsConstants.MSG_ID_SERVICE_ADX_AD_RSP, sessInfo);
+                return true;
+            }
+
             int index = (int) (delayTotalNum.getAndIncrement() % DISPATCHER_SIZE);
             /**
              * 当 delayTotalNum 不断 ++ 达到最大值后，会变成负数，为了防止数组越界 故当 index 小于 0 时重置
@@ -40,8 +53,8 @@ public class GDelayModule {
                 index = 0;
                 delayTotalNum.set(0L);
             }
-            delayedTaskList.get(index).addDelayQueue(delayMsg);
-            logger.debug("Add Message,delay time is {} ms ", delayMsg.getDelayTime());
+            delayedTaskList.get(index).addDelayQueue(new DelayMsg(msg.objContext, delayTime));
+            logger.debug("Add Message,delay time is {} ms ", delayTime);
             return true;
         }
         return false;
@@ -60,6 +73,26 @@ public class GDelayModule {
             dispatcher.shutdown();
         }
     }
+
+    /**
+     * 实际休眠时间
+     * <p>
+     * 设置的休眠时间 - 系统消耗时间 - 系统处理时间（预计）
+     *
+     * @param sessionInfo
+     * @return
+     */
+    private static long realDelayTime(GSessionInfo sessionInfo) {
+        long costTime = System.currentTimeMillis() - sessionInfo.millRecvReq;
+        int expectedTime = ReflectorsSystem.sysMgrModule().getSysConfigDTO().getSysDealTime();
+        long realTime = sessionInfo.getPlatConfigDTO().getDelayTime() - costTime - expectedTime;
+
+        logger.debug("req has cost time {} ms,expected deal time {} ms,real sleep time {} ms,sid={}",
+                costTime, expectedTime, realTime, sessionInfo.sid);
+
+        return realTime;
+    }
+
 }
 
 /**
@@ -102,7 +135,7 @@ class GDelayedTaskConsumer implements Runnable {
                     continue;
                 }
                 if (delayMsg.getObjContext() instanceof GSessionInfo) {
-                    ReflectorsSystem.srvModule().addMsg(SparrowConstants.MSG_ID_SERVICE_ADX_AD_RSP, delayMsg.getObjContext());
+                    ReflectorsSystem.srvModule().addMsg(ReflectorsConstants.MSG_ID_SERVICE_ADX_AD_RSP, delayMsg.getObjContext());
                 } else {
                     logger.warn("msg.objContext is not instanceof GSessionInfo");
                     continue;

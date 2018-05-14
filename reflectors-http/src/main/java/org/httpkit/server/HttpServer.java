@@ -1,13 +1,17 @@
 package org.httpkit.server;
 
-import com.iflytek.sparrow.share.GThreadFactory;
+import com.sywc.reflectors.share.GThreadFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
-import java.nio.channels.*;
+import java.nio.channels.ClosedSelectorException;
+import java.nio.channels.SelectionKey;
+import java.nio.channels.Selector;
+import java.nio.channels.ServerSocketChannel;
+import java.nio.channels.SocketChannel;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -38,16 +42,11 @@ public class HttpServer {
     private ExecutorService iOWorkerPool;
     private volatile boolean running = false;
 
-    public HttpServer(String ip,
-                      int port,
-                      IHandler handler) throws IOException {
+    public HttpServer(String ip, int port, IHandler handler) throws IOException {
         this(ip, port, handler, 10);
     }
 
-    public HttpServer(String ip,
-                      int port,
-                      IHandler handler,
-                      int ioWorkerNum) throws IOException {
+    public HttpServer(String ip, int port, IHandler handler, int ioWorkerNum) throws IOException {
         this(ip,
                 port,
                 handler,
@@ -98,7 +97,6 @@ public class HttpServer {
                 /* 接收到http请求链路后, 将链路绑定到一个Work线程 */
                 SocketAddress remoteAddress = s.getRemoteAddress();
 
-//        LOGGER.debug("local socket {}", s.getLocalAddress());
                 int idxNioThread = (int) (recvSocketNum % nioThreadNum);
                 if (!iOWorkerList.get(idxNioThread).addMsg(IOWorker.NIOTHREAD_MSGID_001_BINDING_SOCKET, s)) {
                     LOGGER.error("socket({}) binding failed!", remoteAddress);
@@ -145,10 +143,10 @@ public class HttpServer {
                             if (key.isAcceptable()) {
                                 accept(key);
                             } else if (key.isReadable()) {
-                        /* 异常 */
+                                /* 异常 */
                                 LOGGER.error("recv read msg");
                             } else if (key.isWritable()) {
-                        /* 异常 */
+                                /* 异常 */
                                 LOGGER.error("recv write msg");
                             }
                         }

@@ -1,6 +1,6 @@
 package com.sywc.reflectors.share.task;
 
-import com.iflytek.sparrow.share.Constants;
+import com.sywc.reflectors.share.Constants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

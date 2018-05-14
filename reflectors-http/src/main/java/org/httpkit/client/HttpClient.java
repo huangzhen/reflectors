@@ -1,15 +1,21 @@
 package org.httpkit.client;
 
-import static java.nio.channels.SelectionKey.OP_CONNECT;
-import static java.nio.channels.SelectionKey.OP_READ;
-import static java.nio.channels.SelectionKey.OP_WRITE;
-import static org.httpkit.HttpUtils.SP;
-import static org.httpkit.HttpUtils.getServerAddr;
-import static org.httpkit.client.State.ALL_READ;
-import static org.httpkit.client.State.READ_INITIAL;
-
 import com.codahale.metrics.Meter;
+import com.sywc.reflectors.share.GThreadFactory;
+import com.sywc.reflectors.share.MetricsHandle;
+import org.httpkit.DynamicBytes;
+import org.httpkit.HTTPException;
+import org.httpkit.HeaderMap;
+import org.httpkit.HttpMethod;
+import org.httpkit.HttpRequestAssembleException;
+import org.httpkit.HttpUtils;
+import org.httpkit.PriorityQueue;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLEngine;
+import javax.net.ssl.SSLException;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.URI;
@@ -29,21 +35,14 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLEngine;
-import javax.net.ssl.SSLException;
 
-import com.iflytek.sparrow.share.GThreadFactory;
-import com.iflytek.sparrow.share.MetricsHandle;
-import org.httpkit.DynamicBytes;
-import org.httpkit.HTTPException;
-import org.httpkit.HeaderMap;
-import org.httpkit.HttpMethod;
-import org.httpkit.HttpRequestAssembleException;
-import org.httpkit.HttpUtils;
-import org.httpkit.PriorityQueue;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import static java.nio.channels.SelectionKey.OP_CONNECT;
+import static java.nio.channels.SelectionKey.OP_READ;
+import static java.nio.channels.SelectionKey.OP_WRITE;
+import static org.httpkit.HttpUtils.SP;
+import static org.httpkit.HttpUtils.getServerAddr;
+import static org.httpkit.client.State.ALL_READ;
+import static org.httpkit.client.State.READ_INITIAL;
 
 public final class HttpClient {
     private static final Logger LOGGER = LoggerFactory.getLogger(HttpClient.class);

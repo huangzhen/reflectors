@@ -9,7 +9,7 @@ until [ $a -lt 1  ]
 do
      sleep $stime
 
-     if [ -f /gnome/sprrow/gnome-root-sparrow-server.pid ]
+     if [ -f /gnome/reflectors/gnome-root-sparrow-server.pid ]
      then
         echo "check ok"
         break
@@ -23,12 +23,12 @@ done;
 if [ $a  -le  0  ] ; then
     #cd /gnome/sparrow01 && ./bin/gnome-daemon.sh start sparrow-server ./conf/sparrow.conf &
 
-    echo "${Time} sprrow stop ok ." >> /log/sprrow01/sprrow_check.${DATE_YMD}.logs
-    echo "sprrow01 status stop ok!"
+    echo "${Time} reflectors stop ok ." >> /log/reflectors01/reflectors_check.${DATE_YMD}.logs
+    echo "reflectors01 status stop ok!"
 else
-    ps -ef|egrep "sprrow"|grep -v grep|awk '{print $2 }'|xargs kill -9
-    rm -f /gnome/sprrow/gnome-root-sparrow-server.pid
+    ps -ef|egrep "reflectors"|grep -v grep|awk '{print $2 }'|xargs kill -9
+    rm -f /gnome/reflectors/gnome-root-sparrow-server.pid
 
-    echo "${Time} sprrow stop." >> /log/sprrow/sprrow_check.${DATE_YMD}.logs
-        echo "sprrow01 status ok"
+    echo "${Time} reflectors stop." >> /log/reflectors/reflectors_check.${DATE_YMD}.logs
+        echo "reflectors01 status ok"
 fi

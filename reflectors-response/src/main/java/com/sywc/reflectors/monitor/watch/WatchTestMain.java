@@ -1,7 +1,7 @@
 package com.sywc.reflectors.monitor.watch;
 
 import com.sywc.reflectors.ReflectorsSystem;
-import com.sywc.reflectors.share.SparrowConstants;
+import com.sywc.reflectors.share.ReflectorsConstants;
 
 import java.nio.file.FileSystems;
 import java.nio.file.Paths;
@@ -32,10 +32,10 @@ public class WatchTestMain {
                     WatchService watchRes = FileSystems.getDefault().newWatchService();
                     WatchService watchStatic = FileSystems.getDefault().newWatchService();
 
-                    Paths.get(ReflectorsSystem.upplatDirPath, SparrowConstants.UPPLAT_CONF_DIR_NAME).register(watchConf,
+                    Paths.get(ReflectorsSystem.upplatDirPath, ReflectorsConstants.UPPLAT_CONF_DIR_NAME).register(watchConf,
                             StandardWatchEventKinds.ENTRY_MODIFY, StandardWatchEventKinds.ENTRY_DELETE);
 
-                    Paths.get(ReflectorsSystem.upplatDirPath, SparrowConstants.UPPLAT_RES_DIR_NAME).register(watchRes,
+                    Paths.get(ReflectorsSystem.upplatDirPath, ReflectorsConstants.UPPLAT_RES_DIR_NAME).register(watchRes,
                             StandardWatchEventKinds.ENTRY_MODIFY, StandardWatchEventKinds.ENTRY_DELETE);
 
                     Paths.get(ReflectorsSystem.staticDirPath).register(watchStatic,

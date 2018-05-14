@@ -1,10 +1,10 @@
 package com.sywc.reflectors.handler;
 
 import com.sywc.reflectors.ReflectorsSystem;
-import com.iflytek.sparrow.share.Constants;
+import com.sywc.reflectors.share.Constants;
 import com.sywc.reflectors.share.GSessionInfo;
-import com.iflytek.sparrow.share.OriginRequest;
-import com.sywc.reflectors.share.SparrowConstants;
+import com.sywc.reflectors.share.OriginRequest;
+import com.sywc.reflectors.share.ReflectorsConstants;
 import org.apache.commons.lang3.StringUtils;
 import org.httpkit.HttpMethod;
 import org.httpkit.server.AsyncChannel;
@@ -60,7 +60,7 @@ public class GServiceServerHandler implements IHandler {
 
         if (originReq.type == Constants.HTTP_REQ_TYPE_OPTIONS) {
             log.debug("PreFlight request!");
-            ReflectorsSystem.srvModule().addMsg(SparrowConstants.MSG_ID_SERVICE_ADX_PREFLIGHT_FOR_AD_REQUEST, sessInfo);
+            ReflectorsSystem.srvModule().addMsg(ReflectorsConstants.MSG_ID_SERVICE_ADX_PREFLIGHT_FOR_AD_REQUEST, sessInfo);
             return;
         }
 
@@ -71,18 +71,18 @@ public class GServiceServerHandler implements IHandler {
                     originReq.getQuery,
                     originReq.headers,
                     sessInfo.sid);
-            ReflectorsSystem.srvModule().addMsg(SparrowConstants.MSG_ID_SERVICE_ADX_UNSUPPORT_AD_REQUEST_METHOD, sessInfo);
+            ReflectorsSystem.srvModule().addMsg(ReflectorsConstants.MSG_ID_SERVICE_ADX_UNSUPPORT_AD_REQUEST_METHOD, sessInfo);
             return;
         }
 
         if (StringUtils.containsIgnoreCase(originReq.url, "/api/upplat")) {
-            ReflectorsSystem.srvModule().addMsg(SparrowConstants.MSG_ID_SERVICE_ADX_AD_REQ, sessInfo);
+            ReflectorsSystem.srvModule().addMsg(ReflectorsConstants.MSG_ID_SERVICE_ADX_AD_REQ, sessInfo);
         } else if (StringUtils.containsIgnoreCase(originReq.url, "/api/static")) {
-            ReflectorsSystem.srvModule().addMsg(SparrowConstants.MSG_ID_SERVICE_ADX_AD_STATIC, sessInfo);
+            ReflectorsSystem.srvModule().addMsg(ReflectorsConstants.MSG_ID_SERVICE_ADX_AD_STATIC, sessInfo);
         } else {
             log.debug("Not found,url = {}, query = {}, headers:[{}], sid = {}", originReq.url,
                     originReq.getQuery, originReq.headers, sessInfo.sid);
-            ReflectorsSystem.srvModule().addMsg(SparrowConstants.MSG_ID_SERVICE_ADX_404, sessInfo);
+            ReflectorsSystem.srvModule().addMsg(ReflectorsConstants.MSG_ID_SERVICE_ADX_404, sessInfo);
             return;
         }
         sessInfo.nanoAddToGServerTaskTime = System.nanoTime();
