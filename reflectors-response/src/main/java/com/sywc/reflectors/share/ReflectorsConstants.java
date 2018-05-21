@@ -1,7 +1,5 @@
 package com.sywc.reflectors.share;
 
-import com.sywc.reflectors.share.Constants;
-
 public final class ReflectorsConstants {
 
     public final static int SERVICE_STATUS_INIT = 1;

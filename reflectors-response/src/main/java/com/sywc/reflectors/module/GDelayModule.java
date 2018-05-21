@@ -22,13 +22,22 @@ public class GDelayModule {
 
     private static final String configFile = Thread.currentThread().getContextClassLoader()
             .getResource("reflectors.conf").getPath();
-    private static final int DISPATCHER_SIZE = UtilOper.getIntValue(configFile, "delay_dispatcher_size", 2);
+    private static final int CONF_DELAY_DISPATCHER_SIZE = UtilOper.getIntValue(configFile, "delay_dispatcher_size", 1);
+    /**
+     * 避免随意配置，出现 SIZE 小于0 的情况
+     */
+    private static final int DELAY_DISPATCHER_SIZE = CONF_DELAY_DISPATCHER_SIZE <= 1 ? 1 : CONF_DELAY_DISPATCHER_SIZE;
 
-    private static final List<GDelayedTaskConsumer> delayedTaskList = new ArrayList<>(DISPATCHER_SIZE);
+    private static final List<GDelayedTaskConsumer> delayedTaskList = new ArrayList<>(DELAY_DISPATCHER_SIZE);
 
     private static AtomicLong delayTotalNum = new AtomicLong(0);
+    /**
+     *
+     *
+     */
+    private static boolean DELAY_DISPATCHER_LESS_TWO = false;
 
-    private static final ExecutorService dispatcher = Executors.newFixedThreadPool(DISPATCHER_SIZE,
+    private static final ExecutorService dispatcher = Executors.newFixedThreadPool(DELAY_DISPATCHER_SIZE,
             new GThreadFactory("GDelayModule-Dispatcher"));
 
     public static boolean addMsg(GMsg msg) {
@@ -44,16 +53,19 @@ public class GDelayModule {
                 ReflectorsSystem.srvModule().addMsg(ReflectorsConstants.MSG_ID_SERVICE_ADX_AD_RSP, sessInfo);
                 return true;
             }
-
-            int index = (int) (delayTotalNum.getAndIncrement() % DISPATCHER_SIZE);
-            /**
-             * 当 delayTotalNum 不断 ++ 达到最大值后，会变成负数，为了防止数组越界 故当 index 小于 0 时重置
-             */
-            if (index < 0) {
-                index = 0;
-                delayTotalNum.set(0L);
+            if (DELAY_DISPATCHER_LESS_TWO) {
+                delayedTaskList.get(0).addDelayQueue(new DelayMsg(msg.objContext, delayTime));
+            } else {
+                int index = (int) (delayTotalNum.getAndIncrement() % DELAY_DISPATCHER_SIZE);
+                /**
+                 * 当 delayTotalNum 不断 ++ 达到最大值后，会变成负数，为了防止数组越界 故当 index 小于 0 时重置
+                 */
+                if (index < 0) {
+                    index = 0;
+                    delayTotalNum.set(0L);
+                }
+                delayedTaskList.get(index).addDelayQueue(new DelayMsg(msg.objContext, delayTime));
             }
-            delayedTaskList.get(index).addDelayQueue(new DelayMsg(msg.objContext, delayTime));
             logger.debug("Add Message,delay time is {} ms ", delayTime);
             return true;
         }
@@ -61,10 +73,13 @@ public class GDelayModule {
     }
 
     public static void start() {
-        for (int i = 0; i < DISPATCHER_SIZE; i++) {
+        for (int i = 0; i < DELAY_DISPATCHER_SIZE; i++) {
             GDelayedTaskConsumer delayedTaskConsumer = new GDelayedTaskConsumer("delayTask--" + i);
             delayedTaskList.add(delayedTaskConsumer);
             dispatcher.execute(delayedTaskConsumer);
+        }
+        if (DELAY_DISPATCHER_SIZE < 2) {
+            DELAY_DISPATCHER_LESS_TWO = true;
         }
     }
 
