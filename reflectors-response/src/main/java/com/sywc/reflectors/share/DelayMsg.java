@@ -32,7 +32,7 @@ public class DelayMsg implements Delayed {
 
     @Override
     public int compareTo(Delayed o) {
-        long d = this.getDelay(TimeUnit.NANOSECONDS) - o.getDelay(TimeUnit.NANOSECONDS);
+        long d = this.getDelay(TimeUnit.MILLISECONDS) - o.getDelay(TimeUnit.MILLISECONDS);
         return (d <= 0L) ? -1 : 1;
     }
 
