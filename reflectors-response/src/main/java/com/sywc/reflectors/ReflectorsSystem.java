@@ -18,15 +18,12 @@ public class ReflectorsSystem {
     private static final Logger logger = LoggerFactory.getLogger(ReflectorsSystem.class);
     private static final String configFile = Thread.currentThread().getContextClassLoader()
             .getResource("reflectors.conf").getPath();
-
+    public static final String upplatDirPath = UtilOper.getStringValue(configFile, "upplat_dir_path", "");
+    public static final String staticDirPath = UtilOper.getStringValue(configFile, "static_dir_path", "");
     private static final int mapCacheSize = UtilOper.getIntValue(configFile, "map_cache_size", 100);
     public static volatile LruCacheMap<String, PlatConfigDTO> upplatConfMap = new LruCacheMap<>(mapCacheSize);
     public static volatile LruCacheMap<String, String> upplatResMap = new LruCacheMap<>(mapCacheSize);
     public static volatile LruCacheMap<String, String> upplatStaticMap = new LruCacheMap<>(mapCacheSize);
-
-    public static final String upplatDirPath = UtilOper.getStringValue(configFile, "upplat_dir_path", "");
-    public static final String staticDirPath = UtilOper.getStringValue(configFile, "static_dir_path", "");
-
     private static GSysMgrModule sysMgrTask;
 
     public static void main(String[] args) {

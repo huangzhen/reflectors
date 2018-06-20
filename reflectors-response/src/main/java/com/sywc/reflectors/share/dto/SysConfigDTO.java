@@ -11,16 +11,14 @@ import com.sywc.reflectors.share.UtilOper;
  */
 public final class SysConfigDTO {
     public String configFile;
-
-    public SysConfigDTO(String configFile) {
-        this.configFile = configFile;
-    }
-
     private String srvIp;
     private int srvPort;
     private int srvTaskNum;
     private int serverIoThreads;
     private int sysDealTime;
+    public SysConfigDTO(String configFile) {
+        this.configFile = configFile;
+    }
 
     public boolean initConfig() {
         srvIp = UtilOper.getStringValue(configFile, "service_server_ip", "0.0.0.0");

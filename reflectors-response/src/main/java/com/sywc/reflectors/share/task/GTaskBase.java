@@ -12,12 +12,10 @@ public abstract class GTaskBase {
     private static final int MSG_QUEUE_LENGTH = 10000;
 
     protected String taskName;
+    protected BlockingQueue<GMsg> msgQueue = null;
+    protected volatile boolean running = false;
     private int priority;
     private Thread thread;
-
-    protected BlockingQueue<GMsg> msgQueue = null;
-
-    protected volatile boolean running = false;
 
     protected GTaskBase(String taskName, int iPriority) {
         this.taskName = taskName;

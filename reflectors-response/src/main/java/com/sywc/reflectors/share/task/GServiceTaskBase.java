@@ -10,10 +10,8 @@ import java.util.concurrent.LinkedBlockingQueue;
 public abstract class GServiceTaskBase {
     private static final Logger log = LoggerFactory.getLogger(GServiceTaskBase.class);
     private static final int MSG_QUEUE_LENGTH = 100000000;
-
-    protected String taskName;
-
     protected static BlockingQueue<GMsg> msgQueue = new LinkedBlockingQueue<GMsg>(MSG_QUEUE_LENGTH);
+    protected String taskName;
 
     protected GServiceTaskBase(String taskName, int iPriority) {
         this.taskName = taskName;

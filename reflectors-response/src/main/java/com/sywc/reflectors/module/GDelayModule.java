@@ -29,16 +29,14 @@ public class GDelayModule {
     private static final int DELAY_DISPATCHER_SIZE = CONF_DELAY_DISPATCHER_SIZE <= 1 ? 1 : CONF_DELAY_DISPATCHER_SIZE;
 
     private static final List<GDelayedTaskConsumer> delayedTaskList = new ArrayList<>(DELAY_DISPATCHER_SIZE);
-
+    private static final ExecutorService dispatcher = Executors.newFixedThreadPool(DELAY_DISPATCHER_SIZE,
+            new GThreadFactory("GDelayModule-Dispatcher"));
     private static AtomicLong delayTotalNum = new AtomicLong(0);
     /**
      *
      *
      */
     private static boolean DELAY_DISPATCHER_LESS_TWO = false;
-
-    private static final ExecutorService dispatcher = Executors.newFixedThreadPool(DELAY_DISPATCHER_SIZE,
-            new GThreadFactory("GDelayModule-Dispatcher"));
 
     public static boolean addMsg(GMsg msg) {
         if (msg != null && msg.objContext != null) {
