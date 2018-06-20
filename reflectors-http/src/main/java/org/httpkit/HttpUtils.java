@@ -31,6 +31,12 @@ import static java.net.InetAddress.getByName;
 
 //  SimpleDateFormat is not thread safe
 class DateFormatter extends ThreadLocal<SimpleDateFormat> {
+    private static final DateFormatter FORMATTER = new DateFormatter();
+
+    public static String getDate() {
+        return FORMATTER.get().format(new Date());
+    }
+
     @Override
     protected SimpleDateFormat initialValue() {
         // Formats into HTTP date format (RFC 822/1123).
@@ -38,26 +44,17 @@ class DateFormatter extends ThreadLocal<SimpleDateFormat> {
         f.setTimeZone(TimeZone.getTimeZone("GMT"));
         return f;
     }
-
-    private static final DateFormatter FORMATTER = new DateFormatter();
-
-    public static String getDate() {
-        return FORMATTER.get().format(new Date());
-    }
 }
 
 public class HttpUtils {
-    private static final Logger log = LoggerFactory.getLogger(HttpUtils.class);
     public static final Charset ASCII = Charset.forName("US-ASCII");
     public static final Charset UTF_8 = Charset.forName("utf8");
-
     public static final String CHARSET = "charset=";
     // Colon ':'
     public static final byte COLON = 58;
-
     public static final byte CR = 13;                         // \r
-
     public static final byte LF = 10;                         // \n
+    public static final String TRANSFER_ENCODING = "transfer-encoding";
 
     // public static final int ABORT_PROCESSING = -1;
 
@@ -68,16 +65,11 @@ public class HttpUtils {
     // public static final String ETAG = "ETag";
 
     // public static final String ACCEPT_ENCODING = "accept-encoding";
-
-    public static final String TRANSFER_ENCODING = "transfer-encoding";
-
     public static final String CONTENT_ENCODING = "content-encoding";
-
     public static final String CONTENT_TYPE = "content-type";
-
     public static final String CHUNKED = "chunked";
-
     public static final String CONNECTION = "connection";
+    public static final String X_FORWARDED_FOR = "x-forwarded-for";
 
     // public static final String LOCATION = "location";
 
@@ -86,15 +78,17 @@ public class HttpUtils {
     // public static final String IF_NONE_MATCH = "If-None-Match";
 
     // public static final String LAST_MODIFIED = "Last-Modified";
-
-    public static final String X_FORWARDED_FOR = "x-forwarded-for";
-
     public static final String CONTENT_LENGTH = "content-length";
-
-    // public static final String CACHE_CONTROL = "Cache-Control";
-
     // space ' '
     public static final byte SP = 32;
+
+    // public static final String CACHE_CONTROL = "Cache-Control";
+    public static final String CL = "Content-Length";
+    // <?xml version='1.0' encoding='GBK'?>
+    // <?xml version="1.0" encoding="UTF-8"?>
+    static final Pattern ENCODING = Pattern.compile("encoding=('|\")([\\w|-]+)('|\")", Pattern.CASE_INSENSITIVE);
+    private static final Logger log = LoggerFactory.getLogger(HttpUtils.class);
+    private static final byte[] ALPHAS = "0123456789ABCDEF".getBytes();
 
     public static ByteBuffer bodyBuffer(Object body) throws IOException {
         if (body == null) {
@@ -123,8 +117,6 @@ public class HttpUtils {
             throw new RuntimeException(body.getClass() + " is not understandable");
         }
     }
-
-    private static final byte[] ALPHAS = "0123456789ABCDEF".getBytes();
 
     // like javascript's encodeURI
     // https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/encodeURI
@@ -316,6 +308,8 @@ public class HttpUtils {
         return null;
     }
 
+    /*----------------charset--------------------*/
+
     public static void printError(String msg, Throwable t) {
         log.error(msg, t);
     }
@@ -361,8 +355,6 @@ public class HttpUtils {
         }
     }
 
-    /*----------------charset--------------------*/
-
     public static Charset parseCharset(String type) {
         if (type != null) {
             try {
@@ -377,10 +369,6 @@ public class HttpUtils {
         }
         return null;
     }
-
-    // <?xml version='1.0' encoding='GBK'?>
-    // <?xml version="1.0" encoding="UTF-8"?>
-    static final Pattern ENCODING = Pattern.compile("encoding=('|\")([\\w|-]+)('|\")", Pattern.CASE_INSENSITIVE);
 
     private static Charset guess(String html, String patten) {
         int idx = html.indexOf(patten);
@@ -420,8 +408,6 @@ public class HttpUtils {
         // default utf8
         return result == null ? UTF_8 : result;
     }
-
-    public static final String CL = "Content-Length";
 
     public static ByteBuffer[] HttpEncode(int status, HeaderMap headers, Object body) {
         ByteBuffer bodyBuffer;

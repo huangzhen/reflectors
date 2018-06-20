@@ -14,16 +14,16 @@ import java.util.Map;
  */
 public interface IRespListener {
 
-  void onBodyReceived(byte[] buf, int length) throws AbortException;
+    void onBodyReceived(byte[] buf, int length) throws AbortException;
 
-  void onCompleted();
+    void onCompleted();
 
-  void onHeadersReceived(Map<String, Object> headers) throws AbortException;
+    void onHeadersReceived(Map<String, Object> headers) throws AbortException;
 
-  void onInitialLineReceived(HttpVersion version, HttpStatus status) throws AbortException;
+    void onInitialLineReceived(HttpVersion version, HttpStatus status) throws AbortException;
 
-  /**
-   * protocol error
-   */
-  void onThrowable(Throwable t);
+    /**
+     * protocol error
+     */
+    void onThrowable(Throwable t);
 }

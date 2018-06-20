@@ -8,7 +8,8 @@ import java.io.UnsupportedEncodingException;
 import java.util.Map;
 
 public class OriginRequest {
-    public int type;                       /* 0-GET, 1-POST */
+    /* 0-GET, 1-POST */
+    public int type;
     public String url;
     public String getQuery;
     public byte[] postBody;

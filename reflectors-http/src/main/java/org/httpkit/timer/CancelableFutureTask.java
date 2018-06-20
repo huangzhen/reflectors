@@ -7,10 +7,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 public class CancelableFutureTask implements Comparable<CancelableFutureTask> {
 
+    public final long timeoutTs;
     private final int timeout;
     private final IFn futureTask;
-    public final long timeoutTs;
-
     private final AtomicBoolean done = new AtomicBoolean(false);
     private final PriorityQueue<CancelableFutureTask> queue;
 
@@ -46,6 +45,7 @@ public class CancelableFutureTask implements Comparable<CancelableFutureTask> {
         }
         return b;
     }
+
     @Override
     public int compareTo(CancelableFutureTask o) {
         return (int) (timeoutTs - o.timeoutTs);

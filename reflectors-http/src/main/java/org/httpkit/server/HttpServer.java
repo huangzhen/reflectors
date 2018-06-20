@@ -27,14 +27,14 @@ public class HttpServer {
 
     private final String ip;
     private final int port;
-    private int maxBody;
-    private int maxLine;
-    private int maxWs;
     private final IHandler handler;
     private final Selector selector;
     private final ServerSocketChannel serverChannel;
     private final String name;
     private final int nioThreadNum;
+    private int maxBody;
+    private int maxLine;
+    private int maxWs;
     private List<IOWorker> iOWorkerList = new ArrayList<IOWorker>();
     private long recvSocketNum;
     private AtomicLong recvReqSeqno = new AtomicLong(1L);

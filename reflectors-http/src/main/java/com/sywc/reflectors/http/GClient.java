@@ -22,18 +22,16 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class GClient {
     private static final Logger LOGGER = LoggerFactory.getLogger(GClient.class);
-
+    private final AtomicInteger poolNumber = new AtomicInteger(0);
     private String clientName;
     private HttpClient httpClient;
     private ExecutorService pool = null;
-    private final AtomicInteger poolNumber = new AtomicInteger(0);
+    private volatile boolean running = false;
 
     public GClient(String clientName) {
         this.clientName = clientName;
         pool = new GThreadPoolExecutor(new GThreadFactory(clientName + "-thread-pool-" + poolNumber.getAndIncrement()));
     }
-
-    private volatile boolean running = false;
 
     public boolean start() {
         if (running) {

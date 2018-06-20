@@ -45,10 +45,9 @@ import static org.httpkit.client.State.ALL_READ;
 import static org.httpkit.client.State.READ_INITIAL;
 
 public final class HttpClient {
+    public static final SSLContext DEFAULT_CONTEXT;
     private static final Logger LOGGER = LoggerFactory.getLogger(HttpClient.class);
     private static final AtomicInteger ID = new AtomicInteger(0);
-
-    public static final SSLContext DEFAULT_CONTEXT;
 
     static {
         try {
@@ -64,13 +63,10 @@ public final class HttpClient {
     private final PriorityQueue<Request> requests = new PriorityQueue<Request>();
     // reuse TCP connection
     private final PriorityQueue<PersistentConn> keepalives = new PriorityQueue<PersistentConn>();
-
-    private volatile boolean running = false;
-
     // shared, single thread
     private final ByteBuffer buffer = ByteBuffer.allocateDirect(1024 * 64);
     private final Selector selector;
-
+    private volatile boolean running = false;
     private String name;
 
     private Meter metric;

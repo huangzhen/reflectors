@@ -13,13 +13,13 @@ import java.util.concurrent.atomic.AtomicInteger;
  * similar to Executors.DefaultThreadFactory, but GThreadFactory supports you to name the thread pool.
  */
 public class GThreadFactory implements ThreadFactory {
+    private static Logger log = LoggerFactory.getLogger(GThreadFactory.class);
     //  private static final AtomicInteger poolNumber = new AtomicInteger(1);
     private final ThreadGroup group;
     private final AtomicInteger threadNumber = new AtomicInteger(1);
     private final String namePrefix;
     private Meter metric;
     private String poolName;
-    private static Logger log = LoggerFactory.getLogger(GThreadFactory.class);
 
     public GThreadFactory(String poolName) {
         SecurityManager s = System.getSecurityManager();
