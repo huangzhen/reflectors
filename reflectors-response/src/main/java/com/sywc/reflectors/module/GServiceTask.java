@@ -153,8 +153,8 @@ public class GServiceTask extends GTaskBase {
                         } finally {
                             IOUtils.closeQuietly(inputStream);
                         }
+                        sessInfo.callback.run(HttpEncode(configDTO.getFillHttpCode(), headers, fileResValue));
                     }
-                    sessInfo.callback.run(HttpEncode(configDTO.getFillHttpCode(), headers, fileResValue));
                 } else {
                     sessInfo.callback.run(HttpEncode(configDTO.getNoFillHttpCode(), headers, null));
                 }
@@ -353,6 +353,7 @@ public class GServiceTask extends GTaskBase {
         // 针对跨域访问做的处理
         headers.put("Access-Control-Allow-Origin", "*");
         headers.put("Content-Type", "application/json; charset=utf-8");
+        headers.put("Session-Id", sessionInfo.sid);
         return headers;
 
     }
